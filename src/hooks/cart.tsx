@@ -30,22 +30,40 @@ const CartProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     async function loadProducts(): Promise<void> {
-      // TODO LOAD ITEMS FROM ASYNC STORAGE
+      const productsFromAsync = await AsyncStorage.getItem('@goM:products');
+      setProducts(JSON.parse(productsFromAsync) || []);
     }
 
     loadProducts();
   }, []);
 
   const addToCart = useCallback(async product => {
-    // TODO ADD A NEW ITEM TO THE CART
+    setProducts(state => {
+      const finded = state.find(item => item.id === product.id);
+      const arrProducts = !!finded 
+        ? state.map(item => item.id === product.id 
+            ? {...item, quantity: item.quantity + 1} 
+            : item ) 
+        : [...state, { ...product, quantity: 1 }];
+      AsyncStorage.setItem('@goM:products', JSON.stringify(arrProducts));
+      return arrProducts;
+    });
   }, []);
 
   const increment = useCallback(async id => {
-    // TODO INCREMENTS A PRODUCT QUANTITY IN THE CART
+    setProducts(state => {
+      const arrProducts = state.map(item => item.id === id ? {...item, quantity: item.quantity + 1 } : item)
+      AsyncStorage.setItem('@goM:products', JSON.stringify(arrProducts));
+      return arrProducts;
+    });
   }, []);
 
   const decrement = useCallback(async id => {
-    // TODO DECREMENTS A PRODUCT QUANTITY IN THE CART
+    setProducts(state => {
+      const arrProducts = state.map(item => item.id === id ? {...item, quantity: item.quantity - 1 } : item)
+      AsyncStorage.setItem('@goM:products', JSON.stringify(arrProducts));
+      return arrProducts;
+    });
   }, []);
 
   const value = React.useMemo(
